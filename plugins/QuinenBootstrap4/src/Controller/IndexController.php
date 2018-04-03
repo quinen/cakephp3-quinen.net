@@ -1,16 +1,17 @@
 <?php
-    namespace QuinenBootstrap4\Controller;
+namespace QuinenBootstrap4\Controller;
 
-    use QuinenBootstrap4\Controller\AppController;
+use QuinenBootstrap4\Controller\AppController;
 
-    class IndexController extends AppController
+class IndexController extends AppController
+{
+
+    public function index()
     {
+        $layout = $this->request->getQuery('layout');
 
-        public function index(){
+        $this->viewBuilder()->layout($layout);
 
-        }
 
-        public function layoutStarter(){
-            $this->setLayout('starter');
-        }
     }
+}
