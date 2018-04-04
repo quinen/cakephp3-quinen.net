@@ -7,6 +7,7 @@ Router::plugin(
     'QuinenNet',
     ['path' => '/quinen-net'],
     function (RouteBuilder $routes) {
+        $routes->connect('/', ['controller'=>"Index"]);
         $routes->fallbacks(DashedRoute::class);
     }
 );
