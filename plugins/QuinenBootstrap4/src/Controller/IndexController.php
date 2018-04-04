@@ -8,10 +8,9 @@ class IndexController extends AppController
 
     public function index()
     {
-        $layout = $this->request->getQuery('layout');
+        $layout = $this->request->getQuery('layout','default');
 
-        $this->viewBuilder()->layout($layout);
-
-
+        //$this->viewBuilder()->layout($layout);
+        $this->set(compact('layout'));
     }
 }

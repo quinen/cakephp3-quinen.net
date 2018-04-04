@@ -7,6 +7,7 @@ Router::plugin(
     'QuinenBootstrap4',
     ['path' => '/quinen-bootstrap4'],
     function (RouteBuilder $routes) {
+        $routes->connect('/', ['controller'=>"Index"]);
         $routes->fallbacks(DashedRoute::class);
     }
 );
