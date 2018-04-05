@@ -43,7 +43,7 @@ class Bs4Helper extends HtmlHelper
 
     /**
      * generate navTabs
-     * 
+     *
      * @param $navTabs
      * @param array $options
      *
@@ -133,6 +133,27 @@ class Bs4Helper extends HtmlHelper
             return $reducer;
 
         },['tabs'=>[],'contents'=>[]]);
+    }
+
+    /*
+     * */
+    public function row($cols, array $options = [])
+    {
+        $nbCols =  count($cols);
+        $options += [
+            'width' => floor(12/$nbCols)
+        ];
+        // generation de taille de colonnes
+        if (is_array($options['width'])) {
+            $widths = $options['width'];
+        } else {
+            $widths = array_fill(0, $nbCols, $options['width']);
+        }
+        //debug($widths);
+        $html = collection($cols)->reduce(function ($reducer, $col, $index) use ($widths) {
+            return $reducer.$this->div('col col-md-'.$widths[$index], $col);
+        }, "");
+        return $this->div('row', $html);
     }
 
     /**
