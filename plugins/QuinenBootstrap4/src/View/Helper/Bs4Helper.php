@@ -42,6 +42,8 @@ class Bs4Helper extends HtmlHelper
     }
 
     /**
+     * generate navTabs
+     * 
      * @param $navTabs
      * @param array $options
      *
