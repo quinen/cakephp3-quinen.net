@@ -22,7 +22,13 @@
 </head>
 <body>
     <?= $this->Flash->render() ?>
-    <?= $this->fetch('content') ?>
+
+    <?php
+        echo $this->Html->div(
+            'container-fluid',
+            $this->fetch('content')
+        );
+    ?>
 
     <!--    jquery  -->
     <?= $this->Html->script("https://code.jquery.com/jquery-3.2.1.slim.min.js",[

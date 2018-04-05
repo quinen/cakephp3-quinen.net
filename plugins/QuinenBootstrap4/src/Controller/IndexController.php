@@ -18,11 +18,21 @@ class IndexController extends AppController
      */
     public function index()
     {
+        $this->test();
+    }
 
+    /**
+     * Test method
+     * @return void
+     */
+    private function test()
+    {
         $layout = $this->request->getQuery('layout', 'default');
 
         $this->Flash->success("test de success");
         $this->Flash->error("test de error");
+        $this->Flash->info("test de info");
+        $this->Flash->warning("test de warning");
         //$this->Flash->toto("test de toto");
 
         //debug($_SESSION);
