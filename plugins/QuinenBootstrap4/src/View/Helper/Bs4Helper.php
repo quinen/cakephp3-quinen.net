@@ -14,6 +14,7 @@ use Cake\Collection\Collection;
  */
 class Bs4Helper extends HtmlHelper
 {
+    use ContentOptionsTrait;
 
     /**
      *
@@ -39,6 +40,29 @@ class Bs4Helper extends HtmlHelper
         }
 
         return $this->div('card',$divHeader.$divBody.$divFooter);
+    }
+
+    public function navbar($navs, array $options = []){
+        $options += [
+            'color' => "light",
+            'bg' => "light"
+        ];
+
+        // nav
+        $options = $this->addClass($options,"navbar");
+        $options = $this->addClass($options,"navbar-".$options['color']);
+        $options = $this->addClass($options,"bg-".$options['bg']);
+        unset($options['color']);
+        unset($options['bg']);
+
+
+        // brand
+
+        // brand button menu
+
+        $navHtml = json_encode($navs);
+
+        return $this->tag('nav', $navHtml, $options);
     }
 
     /**
@@ -135,13 +159,20 @@ class Bs4Helper extends HtmlHelper
         },['tabs'=>[],'contents'=>[]]);
     }
 
-    /*
-     * */
+
+    /**
+     * generate a row of cols
+     *
+     * @param $cols
+     * @param array $options
+     * @return string
+     */
     public function row($cols, array $options = [])
     {
         $nbCols =  count($cols);
         $options += [
-            'width' => floor(12/$nbCols)
+            'width' => floor(12/$nbCols),
+            'gutters' => true
         ];
         // generation de taille de colonnes
         if (is_array($options['width'])) {
@@ -150,10 +181,16 @@ class Bs4Helper extends HtmlHelper
             $widths = array_fill(0, $nbCols, $options['width']);
         }
         //debug($widths);
-        $html = collection($cols)->reduce(function ($reducer, $col, $index) use ($widths) {
-            return $reducer.$this->div('col col-md-'.$widths[$index], $col);
-        }, "");
-        return $this->div('row', $html);
+        $colsArray = collection($cols)->map(function ($col, $index) use ($widths) {
+            return $this->div('col col-md-'.$widths[$index], $col);
+        }, [])->toArray();
+
+        $class = "row";
+        if(!$options['gutters']){
+            $class .= " no-gutters";
+        }
+
+        return $this->div($class, implode($colsArray));
     }
 
     /**
@@ -164,19 +201,37 @@ class Bs4Helper extends HtmlHelper
      */
     public function ul(Collection $list)
     {
-        return $this->nestedList($list->toArray());
+        $lis = $list->map(function ($li) {
+            // si ! array
+            if(!is_array($li)){
+                $li = ['text'=>$li];
+            }
 
-        /*
-         * ancienne methode
-        $lis = $list->reduce(
-            function ($reducer, $li) {
-                $reducer .= $this->tag('li', $li);
-                return $reducer;
-            },
-            ""
-        );
+            $li += [
+                'text' => false,
+                'link' => false
+            ];
 
-        return $this->tag('ul', $lis);
-        */
+            debug($li);
+
+            $liHtml = $li['text'];
+            unset($li['text']);
+
+            if($li['link']){
+                $liLink = $li['link'];
+                unset($li['link']);
+
+                list($liContent,$liOptions) = $this->getContentOptions($liLink);
+
+                debug($liContent);
+                debug($liOptions);
+
+                $liHtml = $this->link($liHtml,$liContent,$liOptions);
+            }
+
+            return $this->tag('li', $liHtml,$li);
+        });
+
+        return $this->tag('ul', implode($lis->toArray()));
     }
 }
