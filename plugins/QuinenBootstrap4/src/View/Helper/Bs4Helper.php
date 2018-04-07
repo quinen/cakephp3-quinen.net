@@ -19,7 +19,8 @@ class Bs4Helper extends HtmlHelper
     /**
      *
      */
-    public function card($body, array $options = []){
+    public function card($body, array $options = [])
+    {
         $options += [
             'header' => false,
             'footer' => false
@@ -44,9 +45,18 @@ class Bs4Helper extends HtmlHelper
 
     /**
      * Convert content and options link in a content 
+     * 
+     * @param string $content           content
+     * @param array  $options           options
+     * @param array  $injectLinkOptions injectLinkOptions
+     * 
+     * @return array [content,options]
      */
-    protected function coatLink($content,array $options = [])
-    {
+    protected function coatLink(
+        $content, 
+        array $options = [], 
+        array $injectLinkOptions = []
+    ) {
         $options += [
             'link' => false
         ];
@@ -55,13 +65,24 @@ class Bs4Helper extends HtmlHelper
             // take the link 
             list($linkContent,$linkOptions) 
                 = $this->getContentOptions($options['link']);
-                $content = $this->link($content, $linkContent, $linkOptions);
+            $content = $this->link(
+                $content, 
+                $linkContent, 
+                $linkOptions + $injectLinkOptions
+            );
         };
         unset($options['link']);
 
         return [$content,$options];
     }
 
+    /**
+     * Extract icon and text and generate a string for both
+     * 
+     * @param array $options options to parse
+     * 
+     * @return array [content,options without iconText related elements]
+     */
     protected function extractIconText(array $options = []) 
     {
         $optionsDefaults = [
@@ -91,27 +112,92 @@ class Bs4Helper extends HtmlHelper
         return [$icon . (empty($icon)?"":"&nbsp;") . $text, $options];
     }
 
-    public function navbar($navs, array $options = []){
+    public function navbar($navs, array $options = [])
+    {
         $options += [
             'color' => "light",
-            'bg' => "light"
+            'bg' => "light",
+            'id' => "nb" . uniqid(),
+            'expand' => "sm"
         ];
 
-        // nav
-        $options = $this->addClass($options,"navbar");
-        $options = $this->addClass($options,"navbar-".$options['color']);
-        $options = $this->addClass($options,"bg-".$options['bg']);
+        // nav options
+        $options = $this->addClass(
+            $options, 
+            "navbar navbar-" . $options['color'] . 
+            " bg-" . $options['bg'] . " navbar-expand-" . $options['expand']
+        );
         unset($options['color']);
         unset($options['bg']);
 
-
         // brand
+        list($navBrand,$navs) = $this->navbarBrand($navs);
 
-        // brand button menu
+        // nav collapse button
 
-        $navHtml = json_encode($navs);
+        // nav list  > ul/li
+        $navList = $this->navbarList($navs);
+        
+        $navHtml = $navBrand.$navList
+        ;
 
         return $this->tag('nav', $navHtml, $options);
+    }
+
+    /**
+     * Generate the brand element from navs
+     * 
+     * @param array $navs navigation data
+     * 
+     * @return string brand HTML string
+     */
+    protected function navbarBrand($navs)
+    {
+        // filter data
+        $brand = collection($navs)->filter(
+            function ($nav) {
+                return isset($nav['brand']);
+            }
+        )->first();
+        // generate brand string
+        if (!empty($brand)) {
+            // if non empty change brand for text
+            $brand['text'] = $brand['brand'];
+            unset($brand['brand']);
+            list($iconText,$brand) = $this->extractIconText($brand);
+            // coatLink and return value
+            list($brand) = $this->coatLink(
+                $iconText, 
+                $brand, 
+                ['class'=>"navbar-brand"]
+            );
+        }
+        // return navs without brand
+        $navs = collection($navs)->reject(
+            function ($nav) {
+                return isset($nav['brand']);
+            }
+        )->toArray();
+        return [$brand,$navs];
+    }
+
+    protected function navbarList($navs)
+    {
+        $navs = collection($navs)->map(
+            function ($nav) {
+                $nav = $this->addClass($nav, "nav-item");
+                // extract all the options for icon and text
+                list($iconText,$nav) = $this->extractIconText($nav);
+                // coat icontext with a link if set
+                list($link,$nav) = $this->coatLink(
+                    $iconText, 
+                    $nav, 
+                    ['class'=>"nav-link"] 
+                );
+                return [$link, $nav];
+            }
+        );
+        return $this->ul($navs, ['class'=>"navbar-nav mr-auto"]);
     }
 
     /**
@@ -121,7 +207,8 @@ class Bs4Helper extends HtmlHelper
      * @param array $options
      *
      */
-    public function navTabs($navTabs, array $options = []){
+    public function navTabs($navTabs, array $options = [])
+    {
         $options += [
             'id' => "nt".uniqid()
         ];
@@ -252,56 +339,16 @@ class Bs4Helper extends HtmlHelper
     public function ul(Collection $list,array $options = [])
     {
         // list of contentOptions + options for ul/ol
-        
-
         $lis = $list->reduce(
             function ($reducer,$li) {
-                list($iconText,$li) = $this->extractIconText($li);
-                list($link,$li) = $this->coatLink($iconText, $li);
-                $reducer['list'][] = $link;
-                $reducer['listOptions'][] = $li;
+                list($li,$liOptions) = $this->getContentOptions($li);
+                $reducer['list'][] = $li;
+                $reducer['listOptions'][] = $liOptions;
                 return $reducer;
             },
             ['list'=>[],'listOptions'=>[]]
         );
 
         return $this->nestedList($lis['list'], $options, $lis['listOptions']);
-
-
-
-        $lis = $list->map(
-            function ($li) {
-                // si ! array
-                if(!is_array($li)){
-                    $li = ['text'=>$li];
-                }
-
-                $li += [
-                    'text' => false,
-                    'link' => false
-                ];
-
-                debug($li);
-
-                $liHtml = $li['text'];
-                unset($li['text']);
-
-                if($li['link']){
-                    $liLink = $li['link'];
-                    unset($li['link']);
-
-                    list($liContent,$liOptions) = $this->getContentOptions($liLink);
-
-                    debug($liContent);
-                    debug($liOptions);
-
-                    $liHtml = $this->link($liHtml, $liContent, $liOptions);
-                }
-
-                return $this->tag('li', $liHtml, $li);
-            }
-        );
-
-        return $this->tag('ul', implode($lis->toArray()));
     }
 }

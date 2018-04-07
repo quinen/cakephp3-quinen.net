@@ -44,5 +44,16 @@ echo $this->Bs4->navbar([
     [
         'brand' => "Brand",
         "link" => "/"
+    ],
+    [
+        'text' => "Home",
+        'link' => "/"
+    ],
+    [
+        'text' => "Bs4",
+        'link' => [
+            'plugin' => "QuinenBootstrap4",
+            'controller' => "Index"
+        ]
     ]
 ]);
