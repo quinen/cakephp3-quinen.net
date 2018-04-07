@@ -42,6 +42,55 @@ class Bs4Helper extends HtmlHelper
         return $this->div('card',$divHeader.$divBody.$divFooter);
     }
 
+    /**
+     * Convert content and options link in a content 
+     */
+    protected function coatLink($content,array $options = [])
+    {
+        $options += [
+            'link' => false
+        ];
+
+        if ($options['link']) {
+            // take the link 
+            list($linkContent,$linkOptions) 
+                = $this->getContentOptions($options['link']);
+                $content = $this->link($content, $linkContent, $linkOptions);
+        };
+        unset($options['link']);
+
+        return [$content,$options];
+    }
+
+    protected function extractIconText(array $options = []) 
+    {
+        $optionsDefaults = [
+            'icon' => false,
+            'showIcon' => true,
+            'text' => false,
+            'showText' => true,
+        ];
+
+        $options += $optionsDefaults;
+
+        $icon = $text = "";
+
+        if ($options['showIcon'] && $options['icon']) {
+            list($iconContent,$iconOptions) 
+                = $this->getContentOptions($options['icon']);
+            $icon = $this->icon($iconContent, $iconOptions);
+        }
+
+        if ($options['showText'] && $options['text']) {
+            $text = $options['text'];
+        }
+
+        // remove the keys
+        $options = array_diff_key($options, $optionsDefaults);
+
+        return [$icon . (empty($icon)?"":"&nbsp;") . $text, $options];
+    }
+
     public function navbar($navs, array $options = []){
         $options += [
             'color' => "light",
@@ -102,7 +151,7 @@ class Bs4Helper extends HtmlHelper
      * @param $options
      * @return array [tabs,contents]
      */
-    private function navTabContents($navTabs, $options)
+    protected function navTabContents($navTabs, $options)
     {
         // is any tab is active ? if not then the first one is selected
         $hasActive = collection($navTabs)->some(function($navTab){
@@ -196,41 +245,62 @@ class Bs4Helper extends HtmlHelper
     /**
      * List method
      * <ul><...li></ul>
+     * receive a collection of element, each with potentials options, then send it to nested list
      * 
      * @return string html
      */
-    public function ul(Collection $list)
+    public function ul(Collection $list,array $options = [])
     {
-        $lis = $list->map(function ($li) {
-            // si ! array
-            if(!is_array($li)){
-                $li = ['text'=>$li];
+        // list of contentOptions + options for ul/ol
+        
+
+        $lis = $list->reduce(
+            function ($reducer,$li) {
+                list($iconText,$li) = $this->extractIconText($li);
+                list($link,$li) = $this->coatLink($iconText, $li);
+                $reducer['list'][] = $link;
+                $reducer['listOptions'][] = $li;
+                return $reducer;
+            },
+            ['list'=>[],'listOptions'=>[]]
+        );
+
+        return $this->nestedList($lis['list'], $options, $lis['listOptions']);
+
+
+
+        $lis = $list->map(
+            function ($li) {
+                // si ! array
+                if(!is_array($li)){
+                    $li = ['text'=>$li];
+                }
+
+                $li += [
+                    'text' => false,
+                    'link' => false
+                ];
+
+                debug($li);
+
+                $liHtml = $li['text'];
+                unset($li['text']);
+
+                if($li['link']){
+                    $liLink = $li['link'];
+                    unset($li['link']);
+
+                    list($liContent,$liOptions) = $this->getContentOptions($liLink);
+
+                    debug($liContent);
+                    debug($liOptions);
+
+                    $liHtml = $this->link($liHtml, $liContent, $liOptions);
+                }
+
+                return $this->tag('li', $liHtml, $li);
             }
-
-            $li += [
-                'text' => false,
-                'link' => false
-            ];
-
-            debug($li);
-
-            $liHtml = $li['text'];
-            unset($li['text']);
-
-            if($li['link']){
-                $liLink = $li['link'];
-                unset($li['link']);
-
-                list($liContent,$liOptions) = $this->getContentOptions($liLink);
-
-                debug($liContent);
-                debug($liOptions);
-
-                $liHtml = $this->link($liHtml,$liContent,$liOptions);
-            }
-
-            return $this->tag('li', $liHtml,$li);
-        });
+        );
 
         return $this->tag('ul', implode($lis->toArray()));
     }

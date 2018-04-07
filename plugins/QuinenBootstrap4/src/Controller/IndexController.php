@@ -1,6 +1,6 @@
 <?php
 /**
- * 
+ *  
  */
 namespace QuinenBootstrap4\Controller;
 
@@ -18,14 +18,15 @@ class IndexController extends AppController
      */
     public function index()
     {
-        $this->test();
+        $this->_test();
     }
 
     /**
      * Test method
+     * 
      * @return void
      */
-    private function test()
+    private function _test()
     {
         $layout = $this->request->getQuery('layout', 'default');
 
