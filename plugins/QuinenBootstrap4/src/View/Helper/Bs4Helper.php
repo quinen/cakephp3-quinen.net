@@ -16,6 +16,33 @@ class Bs4Helper extends HtmlHelper
 {
     use ContentOptionsTrait;
 
+    protected $buttonModels = [
+        'add' => ['icon'=>"plus",'text'=>"Ajouter",'color'=>"success"],
+        'create' => "add",
+        'delete' => ['icon'=>"times","text"=>"Supprimer","color"=>"danger"],
+        'edit' => ['icon' => "pencil","text"=>"Modifier",'color'=>"warning"],
+        'read' => "view",
+        'update' => "edit",
+        'view' => ['icon'=> "eye",'text' => "Detail","color"=>"info"],
+    ];
+
+    public function button($text, array $options = [])
+    {
+        
+        $options += [
+            'model' => $model,
+            'color' => "light",
+            'text' => false,
+            'icon' => false
+        ];
+
+        return $this->tag(
+            'button',
+            $buttonContent,
+            $buttonOptions
+        );
+    }
+
     /**
      *
      */
@@ -137,9 +164,8 @@ class Bs4Helper extends HtmlHelper
 
         // nav list  > ul/li
         $navList = $this->navbarList($navs);
-        
-        $navHtml = $navBrand.$navList
-        ;
+
+        $navHtml = $navBrand.$navList;
 
         return $this->tag('nav', $navHtml, $options);
     }
@@ -185,18 +211,22 @@ class Bs4Helper extends HtmlHelper
     {
         $navs = collection($navs)->map(
             function ($nav) {
-                $nav = $this->addClass($nav, "nav-item");
+                $liClass = "nav-item";
+                $linkClass = "nav-link";
+
+                $nav = $this->addClass($nav, $liClass);
                 // extract all the options for icon and text
                 list($iconText,$nav) = $this->extractIconText($nav);
                 // coat icontext with a link if set
                 list($link,$nav) = $this->coatLink(
                     $iconText, 
                     $nav, 
-                    ['class'=>"nav-link"] 
+                    ['class' => $linkClass]
                 );
                 return [$link, $nav];
             }
         );
+        debug($navs->toArray());
         return $this->ul($navs, ['class'=>"navbar-nav mr-auto"]);
     }
 

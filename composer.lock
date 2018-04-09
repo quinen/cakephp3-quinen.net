@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a295a82d69253538804b8b09cdd320d0",
+    "content-hash": "13df9c5c14f99ceeb57a863cf55c5c40",
     "packages": [
         {
             "name": "aura/intl",

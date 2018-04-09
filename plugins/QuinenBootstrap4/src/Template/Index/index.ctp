@@ -54,6 +54,49 @@ echo $this->Bs4->navbar([
         'link' => [
             'plugin' => "QuinenBootstrap4",
             'controller' => "Index"
+        ]    
+    ],
+    [
+        'text' => "menu",
+        'menu' => [
+            [
+                'text' => "element 1"
+            ],
+            [
+                'text' => "element 2"
+            ],
+            [
+                'text' => "element 3"
+            ]
+        ]
+    ]
+
+]);
+
+echo '<div class="dropdown show">
+<a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+  Dropdown link
+</a>
+
+<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+  <a class="dropdown-item" href="#">Action</a>
+  <a class="dropdown-item" href="#">Another action</a>
+  <a class="dropdown-item" href="#">Something else here</a>
+</div>
+</div>';
+
+echo $this->Bs4->dropdown([
+    'text' => "Dropdown link",
+    'type' => "secondary",
+    'menu' => [
+        [
+            'text' => "Action"
+        ],
+        [
+            'text' => "Another Action"
+        ],
+        [
+            'text' => "Something else here"
         ]
     ]
 ]);
