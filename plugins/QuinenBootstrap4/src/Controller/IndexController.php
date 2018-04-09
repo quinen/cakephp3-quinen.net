@@ -10,23 +10,12 @@ use QuinenBootstrap4\Controller\AppController;
  */
 class IndexController extends AppController
 {
-
-    /**
-     * Index action
-     * 
-     * @return void
-     */
-    public function index()
-    {
-        $this->_test();
-    }
-
     /**
      * Test method
      * 
      * @return void
      */
-    private function _test()
+    public function test()
     {
         $layout = $this->request->getQuery('layout', 'default');
 

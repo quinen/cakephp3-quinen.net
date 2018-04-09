@@ -87,7 +87,7 @@ echo '<div class="dropdown show">
 
 echo $this->Bs4->dropdown([
     'text' => "Dropdown link",
-    'type' => "secondary",
+    'button' => "secondary",
     'menu' => [
         [
             'text' => "Action"

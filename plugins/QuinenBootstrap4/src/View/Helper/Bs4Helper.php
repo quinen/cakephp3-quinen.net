@@ -26,15 +26,21 @@ class Bs4Helper extends HtmlHelper
         'view' => ['icon'=> "eye",'text' => "Detail","color"=>"info"],
     ];
 
-    public function button($text, array $options = [])
+    public function button($button, array $options = [])
     {
+        if(is_array($button)){
+            $options = $button;
+        }
         
         $options += [
-            'model' => $model,
+            'button' => $button,
             'color' => "light",
-            'text' => false,
-            'icon' => false
         ];
+
+        //if(isset($this->buttonModels['$options['button']))
+
+        $iconText = $this->extractIconText($options);
+        content
 
         return $this->tag(
             'button',
@@ -101,6 +107,61 @@ class Bs4Helper extends HtmlHelper
         unset($options['link']);
 
         return [$content,$options];
+    }
+
+
+    /**
+     *
+     *
+     * <div class="dropdown show">
+        <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+     * data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        Dropdown link
+        </a>
+
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+    </div>
+     *
+     * @param $dropdown
+     * @param array $options
+     */
+    public function dropdown($dropdown, array $options = []){
+        $dropdown += [
+            'button' => false,
+            'menu' => false,
+            'role' => "button",
+            'data-toggle' => "dropdown"
+        ];
+
+        // add class dropdown specific
+        $dropdown = $this->addClass($dropdown,"dropdown-toggle");
+
+        // generate button
+        $html = $this->button($dropdown);
+
+        // generate menu
+        if($dropdown['menu']){
+            $html .= $this->dropdownMenu($dropdown['menu'],['class'=>"dropdown-menu"]);
+        }
+
+        return $this->div("dropdown show",$html);
+    }
+
+    public function dropdownMenu($menus, array $options = [])
+    {
+
+
+        $list = collection($menus)->map(function ($menu) {
+            list($iconText, $menu) = $this->extractIconText($menu);
+            list($link, $menu) = $this->coatLink($iconText, $menu);
+            return $link;
+        });
+
+        return $this->tag('div', implode($list->toArray()), $options);
     }
 
     /**
