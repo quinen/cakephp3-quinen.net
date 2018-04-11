@@ -36,5 +36,8 @@ class AppView extends View
      */
     public function initialize()
     {
+        $this->loadHelper('Bs4',[
+            'className' => "QuinenBootstrap4.Bs4"
+        ]);
     }
 }
