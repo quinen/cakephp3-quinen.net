@@ -45,5 +45,17 @@
         'integrity' => "sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl",
         'crossorigin'=>"anonymous"
     ]) ?>
+
+    <!--    font awesome 5 -->
+    <?= $this->Html->script("https://use.fontawesome.com/releases/v5.0.10/js/solid.js",[
+        'integrity' => "sha384-Q7KAHqDd5trmfsv85beYZBsUmw0lsreFBQZfsEhzUtUn5HhpjVzwY0Aq4z8DY9sA",
+        'crossorigin'=>"anonymous",
+        'defer' => true
+    ]) ?>
+    <?= $this->Html->script("https://use.fontawesome.com/releases/v5.0.10/js/fontawesome.js",[
+        'integrity' => "sha384-M2FSA4xMm1G9m4CNXM49UcDHeWcDZNucAlz1WVHxohug0Uw1K+IpUhp/Wjg0y6qG",
+        'crossorigin'=>"anonymous",
+        'defer' => true
+    ]) ?>
 </body>
 </html>

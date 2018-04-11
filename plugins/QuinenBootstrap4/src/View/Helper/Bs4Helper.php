@@ -17,36 +17,95 @@ class Bs4Helper extends HtmlHelper
     use ContentOptionsTrait;
 
     protected $buttonModels = [
-        'add' => ['icon'=>"plus",'text'=>"Ajouter",'color'=>"success"],
-        'create' => "add",
-        'delete' => ['icon'=>"times","text"=>"Supprimer","color"=>"danger"],
-        'edit' => ['icon' => "pencil","text"=>"Modifier",'color'=>"warning"],
-        'read' => "view",
-        'update' => "edit",
-        'view' => ['icon'=> "eye",'text' => "Detail","color"=>"info"],
+        // colors
+        'primary' => ['color'=>"primary"],
+        'secondary' => ['color'=>"secondary"],
+        'success' => ['color'=>"success"],
+        'danger' => ['color'=>"danger"],
+        'warning' => ['color'=>"warning"],
+        'info' => ['color'=>"info"],
+        'light' => ['color'=>"light"],
+        'dark' => ['color'=>"dark"],
+        'link' => ['color'=>"link"],
+        // crud
+        'create' =>['icon'=>"plus",'text'=>"Ajouter",'button'=>"success"],
+        'read' => ['icon'=> "eye",'text' => "Detail","color"=>"info"],
+        'update' => ['icon' => "pencil","text"=>"Modifier",'button'=>"warning"],
+        'delete' => ['icon'=>"times","text"=>"Supprimer","button"=>"danger"],
+        // alias
+        'add' => "create",
+        'edit' => "update",
+        'view' => "read"
     ];
 
-    public function button($button, array $options = [])
+    public function button($button = false, array $options = [])
     {
+        // if personnalized button
         if(is_array($button)){
             $options = $button;
+            $options += ['button' => false];
+        } else {
+            $options += ['button' => $button];
         }
-        
+
+        // on boucle sur les options tant que l'on rencontre une cle bouton dans options
+        while($options['button']){
+            $button = $options['button'];
+            unset($options['button']);
+
+            if(is_string($this->buttonModels[$button])){
+                $options['button'] = $this->buttonModels[$button];
+            } else {
+                $options += $this->buttonModels[$button];
+                // remplace button false if not set else the defined button is used
+                $options += ['button' => false];
+            }
+        }
+        unset($options['button']);
+
         $options += [
-            'button' => $button,
+            'icon' => false,
+            'text' => "button",
             'color' => "light",
+            'isOutline' => false,
+            // possible input
+            //'title' => false
+            //'class' => false
         ];
 
-        //if(isset($this->buttonModels['$options['button']))
+        // title
+        $options += ['title' => $options['text']];
 
-        $iconText = $this->extractIconText($options);
-        content
+        // convert icon and text
+        list($iconText,$options) = $this->extractIconText($options);
 
-        return $this->tag(
-            'button',
-            $buttonContent,
-            $buttonOptions
-        );
+        // class concat
+        $class = "btn btn-";
+        // outline
+        if($options['isOutline']){
+            $class .= "outline-";
+        }
+        unset($options['isOutline']);
+        // color
+        $class .= $options['color'];
+        unset($options['color']);
+        // end class concat
+
+        $options = $this->addClass($options,$class);
+
+        list($buttonContent,$options) = $this->coatLink($iconText,$options,$options);
+
+        // si pas de lien alors on genere un bouton simple .. a charge de l'appelant d'en generer un input
+        if($buttonContent === $iconText)
+        {
+            $options += [
+                'type' => "button"
+            ];
+
+            $buttonContent = $this->tag('button',$iconText,$options);
+        }
+
+        return $buttonContent;
     }
 
     /**
@@ -140,24 +199,26 @@ class Bs4Helper extends HtmlHelper
         // add class dropdown specific
         $dropdown = $this->addClass($dropdown,"dropdown-toggle");
 
-        // generate button
-        $html = $this->button($dropdown);
-
+        $menu = false;
         // generate menu
         if($dropdown['menu']){
-            $html .= $this->dropdownMenu($dropdown['menu'],['class'=>"dropdown-menu"]);
+            $menu = $this->dropdownMenu($dropdown['menu'],['class'=>"dropdown-menu"]);
+            debug($menu);
         }
+        unset($dropdown['menu']);
 
-        return $this->div("dropdown show",$html);
+        // generate button
+        $button = $this->button($dropdown);
+
+        return $this->div("dropdown show",$button.$menu);
     }
 
     public function dropdownMenu($menus, array $options = [])
     {
-
-
         $list = collection($menus)->map(function ($menu) {
             list($iconText, $menu) = $this->extractIconText($menu);
-            list($link, $menu) = $this->coatLink($iconText, $menu);
+            $link = $this->addClass([],'dropdown-item');
+            list($link, $menu) = $this->coatLink($iconText, $menu, $link);
             return $link;
         });
 
@@ -198,6 +259,36 @@ class Bs4Helper extends HtmlHelper
         $options = array_diff_key($options, $optionsDefaults);
 
         return [$icon . (empty($icon)?"":"&nbsp;") . $text, $options];
+    }
+
+    public function icon($icon,array $options = []){
+        $options += [
+            'tag' => "i",
+            'callback' => [$this,'iconFa']
+        ];
+
+        $callback = $options['callback'];
+        unset($options['callback']);
+        $tag = $options['tag'];
+        unset($options['tag']);
+
+        $options = call_user_func($callback,$icon,$options);
+
+        return $this->tag($tag,"",$options);
+    }
+
+    public function iconFa($icon,array $options = []){
+        $options += [
+            'type' => "solid", // solid, regular, brand
+            'prefix' => "fa",
+        ];
+
+        $class = $options['prefix'].substr($options['type'],0,1)." ".$options['prefix']."-".$icon;
+        unset($options['prefix']);
+        unset($options['type']);
+
+        return compact('class');
+
     }
 
     public function navbar($navs, array $options = [])

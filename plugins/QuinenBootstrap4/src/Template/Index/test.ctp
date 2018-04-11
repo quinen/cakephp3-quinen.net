@@ -1,5 +1,5 @@
 <?php
-
+/*
 $layouts = ['starter'];
 
 $urls = collection($layouts)->map(function($layout){
@@ -72,7 +72,7 @@ echo $this->Bs4->navbar([
     ]
 
 ]);
-
+*/
 echo '<div class="dropdown show">
 <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
   Dropdown link
@@ -90,13 +90,20 @@ echo $this->Bs4->dropdown([
     'button' => "secondary",
     'menu' => [
         [
-            'text' => "Action"
+            'text' => "Action",
+            'link' => "#"
         ],
         [
-            'text' => "Another Action"
+            'text' => "Another Action",
+            'link' => "#"
         ],
         [
-            'text' => "Something else here"
+            'text' => "Something else here",
+            'link' => "#"
         ]
     ]
 ]);
+//*/
+echo $this->Html->tag('i',"",['class'=>"fas fa-user"]);
+echo $this->Bs4->button('add');
+echo $this->Bs4->button();
