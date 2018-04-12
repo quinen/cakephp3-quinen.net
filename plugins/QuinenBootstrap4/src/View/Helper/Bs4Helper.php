@@ -193,7 +193,11 @@ class Bs4Helper extends HtmlHelper
             'button' => false,
             'menu' => false,
             'role' => "button",
-            'data-toggle' => "dropdown"
+            'data-toggle' => "dropdown",
+        ];
+
+        $options += [
+            'isCoatDiv' => true
         ];
 
         // add class dropdown specific
@@ -203,14 +207,19 @@ class Bs4Helper extends HtmlHelper
         // generate menu
         if($dropdown['menu']){
             $menu = $this->dropdownMenu($dropdown['menu'],['class'=>"dropdown-menu"]);
-            debug($menu);
         }
         unset($dropdown['menu']);
 
         // generate button
         $button = $this->button($dropdown);
 
-        return $this->div("dropdown show",$button.$menu);
+        $isCoatDiv = $options['isCoatDiv'];
+        unset($options['isCoatDiv']);
+        if($isCoatDiv){
+            return $this->div("dropdown show",$button.$menu);
+        } else {
+            return $button.$menu;
+        }
     }
 
     public function dropdownMenu($menus, array $options = [])
@@ -308,17 +317,20 @@ class Bs4Helper extends HtmlHelper
         );
         unset($options['color']);
         unset($options['bg']);
+        unset($options['expand']);
 
         // brand
         list($navBrand,$navs) = $this->navbarBrand($navs);
-
+//debug($navBrand);
+debug($navs);
         // nav collapse button
 
         // nav list  > ul/li
         $navList = $this->navbarList($navs);
-
+debug($navList);
         $navHtml = $navBrand.$navList;
 
+        unset($options['hasToggle']);
         return $this->tag('nav', $navHtml, $options);
     }
 
@@ -363,19 +375,34 @@ class Bs4Helper extends HtmlHelper
     {
         $navs = collection($navs)->map(
             function ($nav) {
-                $liClass = "nav-item";
-                $linkClass = "nav-link";
+                $nav += [
+                    'menu' => false,
+                    'isActive' => false
+                ];
 
-                $nav = $this->addClass($nav, $liClass);
-                // extract all the options for icon and text
-                list($iconText,$nav) = $this->extractIconText($nav);
-                // coat icontext with a link if set
-                list($link,$nav) = $this->coatLink(
-                    $iconText, 
-                    $nav, 
-                    ['class' => $linkClass]
-                );
-                return [$link, $nav];
+                if($nav['menu']){
+                    $dropdown = $this->dropdown($nav,['isCoatDiv'=>false]);
+                    $nav = ['class' => $liClass." dropdown"];
+                    return [$dropdown, $nav];
+                } else {
+                    $nav = $this->addClass($nav, 'nav-item');
+
+                    // is active ?
+                    if($nav['isActive']){
+                        $nav = $this->addClass($nav, 'active');
+                    }
+                    unset($nav['isActive']);
+                    // extract all the options for icon and text
+                    list($iconText,$nav) = $this->extractIconText($nav);
+                    // coat icontext with a link if set
+                    list($link,$nav) = $this->coatLink(
+                        $iconText,
+                        $nav,
+                        ['class' => "nav-link"]
+                    );
+                    unset($nav['menu']);
+                    return [$link, $nav];
+                }
             }
         );
         debug($navs->toArray());
@@ -515,22 +542,34 @@ class Bs4Helper extends HtmlHelper
      * List method
      * <ul><...li></ul>
      * receive a collection of element, each with potentials options, then send it to nested list
+     * nesttedList isnt cool enough
+     *
+     *         $lis = $list->reduce(
+    function ($reducer,$li) {
+    list($li,$liOptions) = $this->getContentOptions($li);
+    $reducer['list'][] = $li;
+    $reducer['listOptions'][] = $liOptions;
+    return $reducer;
+    },
+    ['list'=>[],'listOptions'=>[]]
+    );
+    debug($lis);
+
+    return $this->nestedList($lis['list'], $options, $lis['listOptions']);
      * 
      * @return string html
      */
     public function ul(Collection $list,array $options = [])
     {
-        // list of contentOptions + options for ul/ol
-        $lis = $list->reduce(
-            function ($reducer,$li) {
-                list($li,$liOptions) = $this->getContentOptions($li);
-                $reducer['list'][] = $li;
-                $reducer['listOptions'][] = $liOptions;
-                return $reducer;
-            },
-            ['list'=>[],'listOptions'=>[]]
-        );
+        $options += [
+            'tag' => "ul" // could be ol
+        ];
 
-        return $this->nestedList($lis['list'], $options, $lis['listOptions']);
+        $content = $list->map(function($li){
+            list($li,$liOptions) = $this->getContentOptions($li);
+            return $this->tag('li',$li,$liOptions);
+        });
+
+        return $this->tag($options['tag'], implode(PHP_EOL,$content->toArray()), $options);
     }
 }

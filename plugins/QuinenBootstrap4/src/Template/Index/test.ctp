@@ -73,18 +73,8 @@ echo $this->Bs4->navbar([
 
 ]);
 */
-echo '<div class="dropdown show">
-<a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-  Dropdown link
-</a>
 
-<div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-  <a class="dropdown-item" href="#">Action</a>
-  <a class="dropdown-item" href="#">Another action</a>
-  <a class="dropdown-item" href="#">Something else here</a>
-</div>
-</div>';
-
+/*
 echo $this->Bs4->dropdown([
     'text' => "Dropdown link",
     'button' => "secondary",
@@ -103,7 +93,78 @@ echo $this->Bs4->dropdown([
         ]
     ]
 ]);
-//*/
 echo $this->Html->tag('i',"",['class'=>"fas fa-user"]);
 echo $this->Bs4->button('add');
 echo $this->Bs4->button();
+*/
+echo '<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">Navbar</a>
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Dropdown
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+    </ul>
+</nav>';
+echo $this->Bs4->navbar([
+    [
+        'brand' => "Navbar",
+        'link' => "#"
+    ],
+    //*
+    [
+        'text' => "Home",
+        'isActive' => true,
+        'link' => "#"
+    ],
+    /*
+    [
+        'text' => "Link",
+        'link' => "#"
+    ],
+    [
+        'text' => "Dropdown",
+        'link' => "#",
+        'menu' => [
+            [
+                'text' => "Action",
+                'link' => "#"
+            ],
+            [
+                'text' => "Another action",
+                'link' => "#"
+            ],
+            [
+                'text' => "-"
+            ],
+            [
+                'text' => "Something else here",
+                'link' => "#"
+            ],
+            [
+                'text' => "Disabled",
+                'link' => "#",
+                'isDisabled' => true
+            ],
+        ]
+    ]
+    */
+],[
+    'hasToggle' => true
+]);
