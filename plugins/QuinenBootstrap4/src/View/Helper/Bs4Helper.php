@@ -150,17 +150,31 @@ class Bs4Helper extends HtmlHelper
         array $injectLinkOptions = []
     ) {
         $options += [
-            'link' => false
+            'isActive' => false,
+            'isDisabled' => false,
+            'link' => "#",
         ];
 
         if ($options['link']) {
             // take the link 
-            list($linkContent,$linkOptions) 
-                = $this->getContentOptions($options['link']);
+            list($linkContent,$linkOptions) = $this->getContentOptions($options['link']);
+
+            // is active ?
+            if($options['isActive']){
+                $injectLinkOptions = $this->addClass($injectLinkOptions, 'active');
+            }
+            unset($options['isActive']);
+
+            // disabled link
+            if($options['isDisabled']){
+                $injectLinkOptions = $this->addClass($injectLinkOptions,"disabled");
+            }
+            unset($options['isDisabled']);
+
             $content = $this->link(
                 $content, 
                 $linkContent, 
-                $linkOptions + $injectLinkOptions
+                $linkOptions + $injectLinkOptions + ['escape' => false]
             );
         };
         unset($options['link']);
@@ -213,22 +227,28 @@ class Bs4Helper extends HtmlHelper
         // generate button
         $button = $this->button($dropdown);
 
-        $isCoatDiv = $options['isCoatDiv'];
-        unset($options['isCoatDiv']);
-        if($isCoatDiv){
-            return $this->div("dropdown show",$button.$menu);
-        } else {
-            return $button.$menu;
+        $content = $button.$menu;
+        if($options['isCoatDiv']){
+            unset($options['isCoatDiv']);
+            $content = $this->div("dropdown show", $content, $options);
         }
+
+        return $content;
     }
 
     public function dropdownMenu($menus, array $options = [])
     {
         $list = collection($menus)->map(function ($menu) {
             list($iconText, $menu) = $this->extractIconText($menu);
-            $link = $this->addClass([],'dropdown-item');
-            list($link, $menu) = $this->coatLink($iconText, $menu, $link);
-            return $link;
+
+            if($iconText==="-"){
+                $content = $this->div('dropdown-divider',"");
+            } else {
+                $link = $this->addClass([],'dropdown-item');
+                list($content, $menu) = $this->coatLink($iconText, $menu, $link);
+            }
+
+            return $content;
         });
 
         return $this->tag('div', implode($list->toArray()), $options);
@@ -321,13 +341,11 @@ class Bs4Helper extends HtmlHelper
 
         // brand
         list($navBrand,$navs) = $this->navbarBrand($navs);
-//debug($navBrand);
-debug($navs);
+
         // nav collapse button
 
         // nav list  > ul/li
         $navList = $this->navbarList($navs);
-debug($navList);
         $navHtml = $navBrand.$navList;
 
         unset($options['hasToggle']);
@@ -377,35 +395,35 @@ debug($navList);
             function ($nav) {
                 $nav += [
                     'menu' => false,
-                    'isActive' => false
                 ];
 
                 if($nav['menu']){
-                    $dropdown = $this->dropdown($nav,['isCoatDiv'=>false]);
-                    $nav = ['class' => $liClass." dropdown"];
-                    return [$dropdown, $nav];
+                    $nav = $this->addClass($nav, 'nav-link');
+                    $content = $this->dropdown($nav,['isCoatDiv'=>false]);
+                    // add class of item after dropdown generation
+                    $nav = ['class' => "nav-item dropdown"];
                 } else {
                     $nav = $this->addClass($nav, 'nav-item');
 
-                    // is active ?
-                    if($nav['isActive']){
-                        $nav = $this->addClass($nav, 'active');
-                    }
-                    unset($nav['isActive']);
                     // extract all the options for icon and text
-                    list($iconText,$nav) = $this->extractIconText($nav);
+                    list($iconText, $nav) = $this->extractIconText($nav);
+
+                    $navLinkOptions = [
+                        'class' => "nav-link"
+                    ];
+
                     // coat icontext with a link if set
-                    list($link,$nav) = $this->coatLink(
+                    list($content, $nav) = $this->coatLink(
                         $iconText,
                         $nav,
-                        ['class' => "nav-link"]
+                        $navLinkOptions
                     );
                     unset($nav['menu']);
-                    return [$link, $nav];
                 }
+
+                return [$content, $nav];
             }
         );
-        debug($navs->toArray());
         return $this->ul($navs, ['class'=>"navbar-nav mr-auto"]);
     }
 
@@ -544,19 +562,7 @@ debug($navList);
      * receive a collection of element, each with potentials options, then send it to nested list
      * nesttedList isnt cool enough
      *
-     *         $lis = $list->reduce(
-    function ($reducer,$li) {
-    list($li,$liOptions) = $this->getContentOptions($li);
-    $reducer['list'][] = $li;
-    $reducer['listOptions'][] = $liOptions;
-    return $reducer;
-    },
-    ['list'=>[],'listOptions'=>[]]
-    );
-    debug($lis);
-
-    return $this->nestedList($lis['list'], $options, $lis['listOptions']);
-     * 
+     *
      * @return string html
      */
     public function ul(Collection $list,array $options = [])

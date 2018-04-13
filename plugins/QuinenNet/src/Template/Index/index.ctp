@@ -1,7 +1,5 @@
 <?php
-echo "index";
-
-echo $this->Bs4->navbar([
+$menu = [
     [
         'icon' => "home",
         'text' => "Accueil"
@@ -16,5 +14,6 @@ echo $this->Bs4->navbar([
             ]
         ]
     ]
-]);
+];
+echo $this->Bs4->navbar($menu);
 debug($this);

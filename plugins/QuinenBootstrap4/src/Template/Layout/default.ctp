@@ -1,5 +1,5 @@
 <?php
-
+$this->append('header',$this->cell('QuinenBootstrap4.Menu')->render());
 ?>
 <?= $this->Html->docType(); ?>
 <html>
@@ -21,12 +21,16 @@
     <?= $this->fetch('script') ?>
 </head>
 <body>
+
+
     <?= $this->Flash->render() ?>
 
     <?php
         echo $this->Html->div(
             'container-fluid',
-            $this->fetch('content')
+            $this->fetch('header').
+            $this->fetch('content').
+            $this->fetch('footer')
         );
     ?>
 

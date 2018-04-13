@@ -123,48 +123,53 @@ echo '<nav class="navbar navbar-expand-lg navbar-light bg-light">
     </ul>
 </nav>';
 echo $this->Bs4->navbar([
+
     [
         'brand' => "Navbar",
-        'link' => "#"
+
     ],
-    //*
+
     [
         'text' => "Home",
         'isActive' => true,
-        'link' => "#"
+
     ],
-    /*
+
     [
         'text' => "Link",
-        'link' => "#"
+
     ],
+
     [
         'text' => "Dropdown",
-        'link' => "#",
+
         'menu' => [
             [
                 'text' => "Action",
-                'link' => "#"
+
             ],
             [
                 'text' => "Another action",
-                'link' => "#"
+
             ],
             [
                 'text' => "-"
             ],
             [
                 'text' => "Something else here",
-                'link' => "#"
+
             ],
             [
                 'text' => "Disabled",
-                'link' => "#",
                 'isDisabled' => true
             ],
         ]
-    ]
-    */
+    ],
+    [
+        'text' => "Disabled",
+        'isDisabled' => true
+    ],
+    //*/
 ],[
     'hasToggle' => true
 ]);
