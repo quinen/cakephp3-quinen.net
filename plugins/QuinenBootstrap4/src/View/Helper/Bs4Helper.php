@@ -66,7 +66,7 @@ class Bs4Helper extends HtmlHelper
         $options += [
             'icon' => false,
             'text' => "button",
-            'color' => "light",
+            'color' => false,
             'isOutline' => false,
             // possible input
             //'title' => false
@@ -80,18 +80,22 @@ class Bs4Helper extends HtmlHelper
         list($iconText,$options) = $this->extractIconText($options);
 
         // class concat
-        $class = "btn btn-";
-        // outline
-        if($options['isOutline']){
-            $class .= "outline-";
+        $class = "btn";
+        if($options['color']){
+            $class .= " btn-";
+            // outline
+            if($options['isOutline']){
+                $class .= "outline-";
+            }
+            unset($options['isOutline']);
+            // color
+            $class .= $options['color'];
+            unset($options['color']);
+            // end class concat
         }
-        unset($options['isOutline']);
-        // color
-        $class .= $options['color'];
-        unset($options['color']);
-        // end class concat
 
-        $options = $this->addClass($options,$class);
+
+        $options = $this->addClass($options, $class);
 
         list($buttonContent,$options) = $this->coatLink($iconText,$options,$options);
 
@@ -149,6 +153,7 @@ class Bs4Helper extends HtmlHelper
         array $options = [], 
         array $injectLinkOptions = []
     ) {
+        //debug($content);debug($options);debug($injectLinkOptions);
         $options += [
             'isActive' => false,
             'isDisabled' => false,
@@ -369,10 +374,15 @@ class Bs4Helper extends HtmlHelper
         )->first();
         // generate brand string
         if (!empty($brand)) {
+            //debug($brand);
+
             // if non empty change brand for text
             $brand['text'] = $brand['brand'];
             unset($brand['brand']);
+
             list($iconText,$brand) = $this->extractIconText($brand);
+            //debug($brand);
+
             // coatLink and return value
             list($brand) = $this->coatLink(
                 $iconText, 
